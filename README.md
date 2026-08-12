@@ -6,6 +6,24 @@
 >
 > Ou clone o repositório: `git clone https://github.com/marcos-scox/forja-app.git`
 
+## Instalação no Android (APK)
+
+Se preferir usar o FORJA como aplicativo Android, baixe o APK assinado na página de releases:
+
+> **📲 Baixar APK:** [forja-app.apk (v1.0.0)](https://github.com/marcos-scox/forja-app/releases/tag/v1.0.0)
+>
+> O arquivo também está incluído no repositório, em `apk/forja-app.apk`.
+
+Para instalar:
+
+1. Baixe o arquivo `forja-app.apk` no seu celular
+2. Abra o arquivo — o Android vai pedir permissão para **instalar apps de fontes desconhecidas** do navegador/gerenciador de arquivos que você usou
+3. Confirme a instalação e pronto: o ícone do **FORJA** vai aparecer na tela inicial
+
+O app abre automaticamente a versão web do painel (funciona como uma Trusted Web Activity). Para usar o **IA Coach**, configure sua chave da Groq em **Configurações** dentro do app.
+
+> Observação: o APK foi gerado com um keystore local de teste. Se você for distribuir o app na Play Store, assine novamente com sua própria chave.
+
 ## Captura do app
 
 ![FORJA — Painel de Treino & Saúde](icons/icon-512.png)
