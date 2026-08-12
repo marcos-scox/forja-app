@@ -10,7 +10,7 @@
 
 Se preferir usar o FORJA como aplicativo Android, baixe o APK assinado na página de releases:
 
-> **📲 Baixar APK:** [forja-app.apk (v1.0.0)](https://github.com/marcos-scox/forja-app/releases/tag/v1.0.0)
+> **📲 Baixar APK:** [forja-app.apk (v1.0.0)](https://github.com/marcos-scox/forja-app/releases/download/v1.0.0/forja-app.apk)
 >
 > O arquivo também está incluído no repositório, em `apk/forja-app.apk`.
 
