@@ -27,6 +27,14 @@ pnpm test
 
 O rastreamento de localização e o pedômetro requerem um dispositivo físico com as permissões concedidas. A interface web serve apenas para desenvolvimento visual; o mapa e os sensores são exercitados no aplicativo Android/iOS.
 
+## Baixar APK Android
+
+O instalador Android disponível na release atual pode ser baixado diretamente pelo link abaixo:
+
+[**Baixar FORJA APK para Android**](https://github.com/marcos-scox/forja-app/releases/download/v1.0.0/forja-app.apk)
+
+> O link aponta para o arquivo publicado na release `v1.0.0` do repositório. Depois de gerar uma nova versão pelo fluxo de publicação, envie o novo APK a uma release do GitHub e atualize este endereço para que ele continue apontando para o build mais recente.
+
 ## Dados locais
 
 As sessões de cardio são salvas no armazenamento local com a rota como uma sequência de coordenadas, distância em metros, duração em milissegundos, ritmo médio e origem da contagem de passos. O projeto não requer conta, servidor ou sincronização para o fluxo básico de cardio.
