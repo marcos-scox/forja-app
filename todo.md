@@ -14,12 +14,12 @@
 - [x] Escrever testes de métricas e persistência e executar verificação de tipos/lint.
 - [x] Criar ícone de aplicativo exclusivo e configurar a marca do Forja.
 - [x] Atualizar o repositório GitHub com a migração.
-- [ ] Gerar e disponibilizar o APK Android instalável.
+- [x] Gerar e disponibilizar o APK Android instalável.
 - [x] Otimizar os ativos de ícone para concluir o checkpoint de publicação.
 - [x] Adicionar ao README o link canônico de download do APK Android.
 - [x] Remover o link do APK legado e substituí-lo pelo fluxo da versão nativa.
 - [x] Validar o pacote Expo Android antes da geração do APK real.
-- [ ] Publicar o APK Android nativo e substituir o instalador legado na release do GitHub.
-- [ ] Configurar uma automação no GitHub para compilar e publicar o APK Android nativo.
-- [ ] Adicionar o workflow GitHub Actions para gerar o APK Android com Gradle.
-- [ ] Executar o workflow, validar o APK gerado e anexá-lo a uma nova release GitHub.
+- [x] Publicar o APK Android nativo e substituir o instalador legado na release do GitHub.
+- [x] Configurar uma automação no GitHub para compilar e publicar o APK Android nativo.
+- [x] Adicionar o workflow GitHub Actions para gerar o APK Android com Gradle.
+- [x] Executar o workflow, validar o APK gerado e anexá-lo a uma nova release GitHub.
