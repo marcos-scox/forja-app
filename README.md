@@ -29,11 +29,9 @@ O rastreamento de localização e o pedômetro requerem um dispositivo físico c
 
 ## Baixar APK Android
 
-O instalador Android disponível na release atual pode ser baixado diretamente pelo link abaixo:
+O APK da versão **Expo/React Native** será disponibilizado nesta seção somente depois que o build Android nativo for concluído e enviado a uma nova release.
 
-[**Baixar FORJA APK para Android**](https://github.com/marcos-scox/forja-app/releases/download/v1.0.0/forja-app.apk)
-
-> O link aponta para o arquivo publicado na release `v1.0.0` do repositório. Depois de gerar uma nova versão pelo fluxo de publicação, envie o novo APK a uma release do GitHub e atualize este endereço para que ele continue apontando para o build mais recente.
+> **Não use o APK da release `v1.0.0` para testar esta migração**, pois ele pertence à antiga versão web/PWA. Assim que o pacote nativo for gerado, este README receberá o link direto correspondente ao novo arquivo.
 
 ## Dados locais
 

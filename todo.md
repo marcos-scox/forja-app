@@ -17,3 +17,5 @@
 - [ ] Gerar e disponibilizar o APK Android instalável.
 - [x] Otimizar os ativos de ícone para concluir o checkpoint de publicação.
 - [x] Adicionar ao README o link canônico de download do APK Android.
+- [x] Remover o link do APK legado e substituí-lo pelo fluxo da versão nativa.
+- [x] Validar o pacote Expo Android antes da geração do APK real.
