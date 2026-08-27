@@ -1,0 +1,90 @@
+name: Gerar APK Android nativo
+
+on:
+  workflow_dispatch:
+    inputs:
+      release_tag:
+        description: "Tag da release que receberá o APK"
+        required: true
+        default: "v2.0.0"
+      release_name:
+        description: "Nome público da release"
+        required: true
+        default: "FORJA v2.0.0 — Android nativo"
+
+permissions:
+  contents: write
+
+jobs:
+  build-and-release:
+    name: Compilar e publicar APK
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Baixar código
+        uses: actions/checkout@v5
+
+      - name: Configurar pnpm
+        uses: pnpm/action-setup@v4
+        with:
+          version: 9
+
+      - name: Configurar Node.js
+        uses: actions/setup-node@v6
+        with:
+          node-version: 22
+          cache: pnpm
+
+      - name: Configurar Java
+        uses: actions/setup-java@v5
+        with:
+          distribution: temurin
+          java-version: "17"
+          cache: gradle
+
+      - name: Configurar SDK Android
+        uses: android-actions/setup-android@v3
+
+      - name: Instalar dependências
+        run: pnpm install --frozen-lockfile
+
+      - name: Validar TypeScript e testes
+        run: |
+          pnpm check
+          pnpm test
+
+      - name: Gerar projeto Android nativo
+        run: pnpm exec expo prebuild --platform android --no-install --clean
+
+      - name: Montar APK instalável
+        working-directory: android
+        run: |
+          chmod +x gradlew
+          ./gradlew assembleRelease --no-daemon
+
+      - name: Preparar arquivo para distribuição
+        run: cp android/app/build/outputs/apk/release/app-release.apk "FORJA-${{ inputs.release_tag }}.apk"
+
+      - name: Guardar APK como artefato do workflow
+        uses: actions/upload-artifact@v4
+        with:
+          name: FORJA-Android-${{ inputs.release_tag }}
+          path: FORJA-${{ inputs.release_tag }}.apk
+          if-no-files-found: error
+          retention-days: 90
+
+      - name: Publicar APK na release do GitHub
+        env:
+          GH_TOKEN: ${{ github.token }}
+          RELEASE_TAG: ${{ inputs.release_tag }}
+          RELEASE_NAME: ${{ inputs.release_name }}
+          APK_FILE: FORJA-${{ inputs.release_tag }}.apk
+        run: |
+          if gh release view "$RELEASE_TAG" >/dev/null 2>&1; then
+            gh release upload "$RELEASE_TAG" "$APK_FILE#FORJA-${RELEASE_TAG}.apk" --clobber
+          else
+            gh release create "$RELEASE_TAG" "$APK_FILE#FORJA-${RELEASE_TAG}.apk" \
+              --title "$RELEASE_NAME" \
+              --notes "APK Android nativo gerado automaticamente pelo GitHub Actions a partir do código Expo/React Native." \
+              --latest
+          fi
