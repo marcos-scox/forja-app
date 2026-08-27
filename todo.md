@@ -15,3 +15,4 @@
 - [x] Criar ícone de aplicativo exclusivo e configurar a marca do Forja.
 - [x] Atualizar o repositório GitHub com a migração.
 - [ ] Gerar e disponibilizar o APK Android instalável.
+- [x] Otimizar os ativos de ícone para concluir o checkpoint de publicação.
