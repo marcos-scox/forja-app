@@ -2,7 +2,7 @@ import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import * as Location from "expo-location";
 import { Pedometer } from "expo-sensors";
 
-import { averagePaceSecPerKm, createId, distanceBetweenMeters, elapsedMs } from "@/lib/forja/metrics";
+import { averagePaceSecPerKm, createId, distanceBetweenMeters, elapsedMs, estimateSteps } from "@/lib/forja/metrics";
 import type { CardioMode, CardioSession, ForjaPreferences, LiveCardioSession, RoutePoint } from "@/lib/forja/types";
 
 type Subscription = { remove: () => void };
@@ -24,6 +24,7 @@ export function useCardioTracker(preferences: ForjaPreferences) {
   const locationSubscription = useRef<Subscription | null>(null);
   const pedometerSubscription = useRef<Subscription | null>(null);
   const pedometerBase = useRef(0);
+  const lastPedometerReading = useRef(0);
 
   const updateDraft = useCallback((updater: (current: LiveCardioSession) => LiveCardioSession) => {
     const current = liveRef.current;
@@ -53,19 +54,23 @@ export function useCardioTracker(preferences: ForjaPreferences) {
         return;
       }
 
-      const permission = await Pedometer.requestPermissionsAsync();
+      const existingPermission = await Pedometer.getPermissionsAsync();
+      const permission = existingPermission.granted ? existingPermission : await Pedometer.requestPermissionsAsync();
       if (!permission.granted) {
         updateDraft((current) => ({ ...current, stepSource: "estimativa" }));
         return;
       }
 
       pedometerBase.current = liveRef.current.steps;
+      lastPedometerReading.current = 0;
       pedometerSubscription.current = Pedometer.watchStepCount(({ steps }) => {
         updateDraft((current) => {
           if (current.status !== "running") {
             return current;
           }
-          return { ...current, steps: pedometerBase.current + steps, stepSource: "sensor" };
+          const normalizedSteps = Math.max(lastPedometerReading.current, steps);
+          lastPedometerReading.current = normalizedSteps;
+          return { ...current, steps: Math.max(current.steps, pedometerBase.current + normalizedSteps), stepSource: "sensor" };
         });
       });
     } catch {
@@ -98,18 +103,18 @@ export function useCardioTracker(preferences: ForjaPreferences) {
         const segmentM = distanceBetweenMeters(previousPoint, nextPoint);
         const secondsSincePrevious = Math.max(1, (nextPoint.timestamp - previousPoint.timestamp) / 1000);
         const speedMps = segmentM / secondsSincePrevious;
-        if (segmentM < 2 || speedMps > 13) {
+        if (segmentM < 1 || speedMps > 15) {
           return withPosition;
         }
 
         const distanceM = current.distanceM + segmentM;
         const route = [...current.route, nextPoint].slice(-5_000);
-        const estimatedSteps = Math.round(distanceM / preferences.stepLengthM);
+        const estimatedSteps = estimateSteps(distanceM, preferences.stepLengthM);
         return {
           ...withPosition,
           distanceM,
           route,
-          steps: current.stepSource === "sensor" ? current.steps : estimatedSteps,
+          steps: current.stepSource === "sensor" ? Math.max(current.steps, estimatedSteps) : estimatedSteps,
         };
       });
     },
@@ -132,7 +137,8 @@ export function useCardioTracker(preferences: ForjaPreferences) {
       }
 
       try {
-        const firstLocation = await Location.getCurrentPositionAsync({ accuracy: Location.Accuracy.Highest });
+        const lastKnownLocation = await Location.getLastKnownPositionAsync({ maxAge: 60_000, requiredAccuracy: 80 });
+        const firstLocation = lastKnownLocation ?? await Location.getCurrentPositionAsync({ accuracy: Location.Accuracy.High });
         const initialPoint = toRoutePoint(firstLocation);
         const startedAt = Date.now();
         const nextDraft: LiveCardioSession = {
@@ -144,7 +150,7 @@ export function useCardioTracker(preferences: ForjaPreferences) {
           elapsedBeforePauseMs: 0,
           distanceM: 0,
           steps: 0,
-          stepSource: preferences.usePedometer ? "sensor" : "estimativa",
+          stepSource: "estimativa",
           route: [initialPoint],
           currentLocation: initialPoint,
           locationAccuracy: initialPoint.accuracy ?? null,
@@ -154,9 +160,9 @@ export function useCardioTracker(preferences: ForjaPreferences) {
         setDraft(nextDraft);
         locationSubscription.current = await Location.watchPositionAsync(
           {
-            accuracy: Location.Accuracy.Highest,
-            distanceInterval: 4,
-            timeInterval: 3_000,
+            accuracy: Location.Accuracy.High,
+            distanceInterval: 1,
+            timeInterval: 1_000,
             mayShowUserSettingsDialog: true,
           },
           receiveLocation,
@@ -196,7 +202,7 @@ export function useCardioTracker(preferences: ForjaPreferences) {
     }
 
     const durationMs = elapsedMs(live);
-    const estimatedSteps = Math.round(live.distanceM / preferences.stepLengthM);
+    const estimatedSteps = estimateSteps(live.distanceM, preferences.stepLengthM);
     const session: CardioSession = {
       id: createId("cardio"),
       mode: live.mode,

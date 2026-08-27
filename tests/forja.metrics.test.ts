@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 
-import { averagePaceSecPerKm, distanceBetweenMeters, elapsedMs, formatDuration, formatPace } from "../lib/forja/metrics";
+import { averagePaceSecPerKm, distanceBetweenMeters, elapsedMs, estimateSteps, formatDuration, formatPace } from "../lib/forja/metrics";
 import type { LiveCardioSession, RoutePoint } from "../lib/forja/types";
 
 const origin: RoutePoint = { latitude: -23.55052, longitude: -46.633308, timestamp: 1_000 };
@@ -46,5 +46,11 @@ describe("métricas do cardio", () => {
 
   it("formata a duração para exibição de cronômetro", () => {
     expect(formatDuration(3_661_000)).toBe("01:01:01");
+  });
+
+  it("estima passos com limites seguros quando o pedômetro não está disponível", () => {
+    expect(estimateSteps(750, 0.75)).toBe(1_000);
+    expect(estimateSteps(100, 0.1)).toBe(250);
+    expect(estimateSteps(-50, 0.75)).toBe(0);
   });
 });

@@ -1,31 +1,28 @@
 import { createContext, useCallback, useContext, useEffect, useMemo, useState, type PropsWithChildren } from "react";
 
-import { createId } from "@/lib/forja/metrics";
 import { readStoredValue, saveStoredValue } from "@/lib/forja/storage";
-import type { CardioSession, ForjaPreferences, Workout } from "@/lib/forja/types";
+import type { CardioSession, ForjaPreferences } from "@/lib/forja/types";
 
 const STORAGE_KEYS = {
   sessions: "forja.mobile.cardio.sessions.v1",
   preferences: "forja.mobile.preferences.v1",
-  workouts: "forja.mobile.workouts.v1",
 } as const;
 
 const DEFAULT_PREFERENCES: ForjaPreferences = {
   usePedometer: true,
   stepLengthM: 0.75,
+  aiProvider: "manus",
+  aiModel: "manus-1.6-lite",
 };
 
 type ForjaContextValue = {
   hydrated: boolean;
   sessions: CardioSession[];
   preferences: ForjaPreferences;
-  workouts: Workout[];
   addSession: (session: CardioSession) => Promise<void>;
   deleteSession: (sessionId: string) => Promise<void>;
   clearSessions: () => Promise<void>;
   updatePreferences: (changes: Partial<ForjaPreferences>) => Promise<void>;
-  addQuickWorkout: () => Promise<void>;
-  toggleWorkout: (workoutId: string) => Promise<void>;
 };
 
 const ForjaContext = createContext<ForjaContextValue | null>(null);
@@ -34,16 +31,14 @@ export function ForjaProvider({ children }: PropsWithChildren) {
   const [hydrated, setHydrated] = useState(false);
   const [sessions, setSessions] = useState<CardioSession[]>([]);
   const [preferences, setPreferences] = useState<ForjaPreferences>(DEFAULT_PREFERENCES);
-  const [workouts, setWorkouts] = useState<Workout[]>([]);
 
   useEffect(() => {
     let mounted = true;
 
     async function hydrate() {
-      const [storedSessions, storedPreferences, storedWorkouts] = await Promise.all([
+      const [storedSessions, storedPreferences] = await Promise.all([
         readStoredValue<CardioSession[]>(STORAGE_KEYS.sessions, []),
         readStoredValue<ForjaPreferences>(STORAGE_KEYS.preferences, DEFAULT_PREFERENCES),
-        readStoredValue<Workout[]>(STORAGE_KEYS.workouts, []),
       ]);
 
       if (!mounted) {
@@ -52,7 +47,6 @@ export function ForjaProvider({ children }: PropsWithChildren) {
 
       setSessions(storedSessions.sort((a, b) => b.startedAt - a.startedAt));
       setPreferences({ ...DEFAULT_PREFERENCES, ...storedPreferences });
-      setWorkouts(storedWorkouts);
       setHydrated(true);
     }
 
@@ -91,47 +85,17 @@ export function ForjaProvider({ children }: PropsWithChildren) {
     });
   }, []);
 
-  const addQuickWorkout = useCallback(async () => {
-    const weekday = new Date().getDay();
-    const workout: Workout = {
-      id: createId("workout"),
-      title: "Força essencial",
-      weekday,
-      exercises: ["Aquecimento", "Movimento principal", "Mobilidade"],
-      completed: false,
-    };
-
-    setWorkouts((current) => {
-      const next = [workout, ...current];
-      void saveStoredValue(STORAGE_KEYS.workouts, next);
-      return next;
-    });
-  }, []);
-
-  const toggleWorkout = useCallback(async (workoutId: string) => {
-    setWorkouts((current) => {
-      const next = current.map((workout) =>
-        workout.id === workoutId ? { ...workout, completed: !workout.completed } : workout,
-      );
-      void saveStoredValue(STORAGE_KEYS.workouts, next);
-      return next;
-    });
-  }, []);
-
   const value = useMemo(
     () => ({
       hydrated,
       sessions,
       preferences,
-      workouts,
       addSession,
       deleteSession,
       clearSessions,
       updatePreferences,
-      addQuickWorkout,
-      toggleWorkout,
     }),
-    [addQuickWorkout, addSession, clearSessions, deleteSession, hydrated, preferences, sessions, toggleWorkout, updatePreferences, workouts],
+    [addSession, clearSessions, deleteSession, hydrated, preferences, sessions, updatePreferences],
   );
 
   return <ForjaContext.Provider value={value}>{children}</ForjaContext.Provider>;

@@ -20,15 +20,19 @@ const leafletHtml = `<!DOCTYPE html>
 const map=L.map('map',{zoomControl:true,attributionControl:true}).setView([-23.55052,-46.633308],13);
 L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',{maxZoom:19,attribution:'© OpenStreetMap contributors'}).addTo(map);
 let routeLine=L.polyline([],{color:'#B9F227',weight:5,opacity:.92,lineCap:'round',lineJoin:'round'}).addTo(map);
-let currentDot=null; let hasPosition=false; const userIcon=L.divIcon({className:'forja-user-marker',html:'<div class="forja-user-marker__dot"></div>',iconSize:[24,24],iconAnchor:[12,12]});
-function setData(payload){const route=(payload.route||[]).map(p=>[p.latitude,p.longitude]); routeLine.setLatLngs(route); const point=payload.currentLocation || payload.route?.[payload.route.length-1]; if(point){const latlng=[point.latitude,point.longitude];if(!currentDot){currentDot=L.marker(latlng,{icon:userIcon,interactive:false,zIndexOffset:1000}).addTo(map)}else{currentDot.setLatLng(latlng)}if(payload.followUser){map.flyTo(latlng,Math.max(map.getZoom(),16),{duration:.55})}else if(!hasPosition && route.length){map.fitBounds(routeLine.getBounds(),{padding:[32,32],maxZoom:16})}hasPosition=true;}else if(route.length>1){map.fitBounds(routeLine.getBounds(),{padding:[32,32],maxZoom:16})}}
+let currentDot=null; let hasPosition=false; let lastCameraMove=0; const userIcon=L.divIcon({className:'forja-user-marker',html:'<div class="forja-user-marker__dot"></div>',iconSize:[24,24],iconAnchor:[12,12]});
+function setData(payload){const route=(payload.route||[]).map(p=>[p.latitude,p.longitude]);if(payload.reset){routeLine.setLatLngs(route);hasPosition=false}else{route.forEach(point=>routeLine.addLatLng(point))}const point=payload.currentLocation || payload.route?.[payload.route.length-1];if(point){const latlng=[point.latitude,point.longitude];if(!currentDot){currentDot=L.marker(latlng,{icon:userIcon,interactive:false,zIndexOffset:1000}).addTo(map)}else{currentDot.setLatLng(latlng)}const now=Date.now();if(payload.followUser&&now-lastCameraMove>1200){map.panTo(latlng,{animate:true,duration:.35});if(map.getZoom()<16)map.setZoom(16);lastCameraMove=now}else if(!hasPosition&&routeLine.getLatLngs().length>1){map.fitBounds(routeLine.getBounds(),{padding:[32,32],maxZoom:16})}hasPosition=true}else if(routeLine.getLatLngs().length>1){map.fitBounds(routeLine.getBounds(),{padding:[32,32],maxZoom:16})}}
 window.forjaSetMapData=setData; window.ReactNativeWebView&&window.ReactNativeWebView.postMessage(JSON.stringify({type:'ready'}));
 </script></body></html>`;
 
 export function LeafletMap({ route, currentLocation, followUser = false }: LeafletMapProps) {
   const mapRef = useRef<WebView>(null);
+  const sentRouteLength = useRef(0);
   const syncMap = useCallback(() => {
-    const payload = JSON.stringify({ route, currentLocation, followUser });
+    const reset = sentRouteLength.current === 0 || route.length < sentRouteLength.current;
+    const routeDelta = reset ? route : route.slice(sentRouteLength.current);
+    sentRouteLength.current = route.length;
+    const payload = JSON.stringify({ route: routeDelta, currentLocation, followUser, reset });
     mapRef.current?.injectJavaScript(`window.forjaSetMapData && window.forjaSetMapData(${payload}); true;`);
   }, [currentLocation, followUser, route]);
 
@@ -53,8 +57,8 @@ export function LeafletMap({ route, currentLocation, followUser = false }: Leafl
       source={{ html: leafletHtml }}
       javaScriptEnabled
       domStorageEnabled
-      onLoadEnd={syncMap}
-      onMessage={syncMap}
+      onLoadEnd={() => { sentRouteLength.current = 0; syncMap(); }}
+      onMessage={() => { sentRouteLength.current = 0; syncMap(); }}
       style={styles.webView}
     />
   );

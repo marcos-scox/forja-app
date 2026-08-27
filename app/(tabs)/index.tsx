@@ -2,15 +2,13 @@ import MaterialIcons from "@expo/vector-icons/MaterialIcons";
 import { router, type Href } from "expo-router";
 import { Pressable, ScrollView, StyleSheet, Text, View } from "react-native";
 
-import { Card, Metric, PrimaryButton, SectionHeading, forjaColors } from "@/components/forja-ui";
+import { Card, Metric, SectionHeading, forjaColors } from "@/components/forja-ui";
 import { ScreenContainer } from "@/components/screen-container";
 import { formatDistance, formatDuration } from "@/lib/forja/metrics";
 import { useForja } from "@/lib/forja/forja-context";
 
 export default function TrainingScreen() {
-  const { hydrated, sessions, workouts, addQuickWorkout, toggleWorkout } = useForja();
-  const today = new Date().getDay();
-  const todayWorkout = workouts.find((workout) => workout.weekday === today);
+  const { hydrated, sessions } = useForja();
   const totalDistance = sessions.reduce((sum, session) => sum + session.distanceM, 0);
   const totalDuration = sessions.reduce((sum, session) => sum + session.durationMs, 0);
 
@@ -37,36 +35,6 @@ export default function TrainingScreen() {
             <View style={styles.metricDivider} />
             <Metric label="tempo" value={hydrated ? formatDuration(totalDuration).slice(0, 5) : "—"} />
           </View>
-        </Card>
-
-        <View style={styles.spacer} />
-        <Card>
-          <SectionHeading eyebrow="Hoje" title="Treino do dia" />
-          {todayWorkout ? (
-            <>
-              <View style={styles.workoutHeadline}>
-                <View style={styles.workoutIcon}>
-                  <MaterialIcons color={forjaColors.lime} name="fitness-center" size={22} />
-                </View>
-                <View style={styles.workoutCopy}>
-                  <Text style={styles.workoutTitle}>{todayWorkout.title}</Text>
-                  <Text style={styles.workoutDescription}>{todayWorkout.exercises.join(" · ")}</Text>
-                </View>
-              </View>
-              <PrimaryButton
-                icon={todayWorkout.completed ? "check-circle" : "play-arrow"}
-                onPress={() => void toggleWorkout(todayWorkout.id)}
-                title={todayWorkout.completed ? "Treino concluído" : "Marcar como concluído"}
-                variant={todayWorkout.completed ? "secondary" : "primary"}
-              />
-            </>
-          ) : (
-            <View style={styles.emptyWorkout}>
-              <Text style={styles.emptyWorkoutTitle}>Nenhum treino planejado para hoje.</Text>
-              <Text style={styles.emptyWorkoutBody}>Crie uma rotina rápida para registrar seu treino de força no aplicativo.</Text>
-              <PrimaryButton icon="add" onPress={() => void addQuickWorkout()} title="Adicionar treino rápido" variant="secondary" />
-            </View>
-          )}
         </Card>
 
         <View style={styles.spacer} />
@@ -98,14 +66,6 @@ const styles = StyleSheet.create({
   metricsRow: { alignItems: "stretch", flexDirection: "row" },
   metricDivider: { backgroundColor: forjaColors.border, width: 1 },
   spacer: { height: 16 },
-  workoutHeadline: { alignItems: "center", flexDirection: "row", gap: 13, marginBottom: 18 },
-  workoutIcon: { alignItems: "center", backgroundColor: "rgba(185, 242, 39, 0.12)", borderRadius: 14, height: 48, justifyContent: "center", width: 48 },
-  workoutCopy: { flex: 1 },
-  workoutTitle: { color: forjaColors.text, fontSize: 16, fontWeight: "800" },
-  workoutDescription: { color: forjaColors.muted, fontSize: 12, lineHeight: 18, marginTop: 4 },
-  emptyWorkout: { gap: 11 },
-  emptyWorkoutTitle: { color: forjaColors.text, fontSize: 15, fontWeight: "800" },
-  emptyWorkoutBody: { color: forjaColors.muted, fontSize: 13, lineHeight: 19, marginBottom: 5 },
   cardioCallout: { alignItems: "center", backgroundColor: forjaColors.surfaceElevated, flexDirection: "row", gap: 13 },
   cardioIcon: { alignItems: "center", backgroundColor: forjaColors.lime, borderRadius: 14, height: 49, justifyContent: "center", width: 49 },
   cardioCopy: { flex: 1 },

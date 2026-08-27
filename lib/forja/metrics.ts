@@ -31,6 +31,12 @@ export function averagePaceSecPerKm(durationMs: number, distanceM: number): numb
   return Math.round((durationMs / 1000) / (distanceM / 1000));
 }
 
+export function estimateSteps(distanceM: number, stepLengthM: number): number {
+  const safeDistance = Number.isFinite(distanceM) ? Math.max(0, distanceM) : 0;
+  const safeStepLength = Number.isFinite(stepLengthM) ? Math.min(1.4, Math.max(0.4, stepLengthM)) : 0.75;
+  return Math.round(safeDistance / safeStepLength);
+}
+
 export function formatDuration(durationMs: number): string {
   const totalSeconds = Math.max(0, Math.floor(durationMs / 1000));
   const hours = Math.floor(totalSeconds / 3600);

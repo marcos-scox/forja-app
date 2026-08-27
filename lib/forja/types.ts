@@ -9,6 +9,14 @@ export type RoutePoint = {
 
 export type StepSource = "sensor" | "estimativa";
 
+export type AIProvider = "manus" | "openai" | "groq" | "gemini" | "claude";
+
+export type AiChatMessage = {
+  id: string;
+  role: "user" | "assistant";
+  content: string;
+};
+
 export type CardioSession = {
   id: string;
   mode: CardioMode;
@@ -48,4 +56,6 @@ export type Workout = {
 export type ForjaPreferences = {
   usePedometer: boolean;
   stepLengthM: number;
+  aiProvider: AIProvider;
+  aiModel: string;
 };

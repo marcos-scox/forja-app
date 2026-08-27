@@ -23,3 +23,9 @@
 - [x] Configurar uma automação no GitHub para compilar e publicar o APK Android nativo.
 - [x] Adicionar o workflow GitHub Actions para gerar o APK Android com Gradle.
 - [x] Executar o workflow, validar o APK gerado e anexá-lo a uma nova release GitHub.
+- [x] Remover o card de treino diário da tela inicial.
+- [x] Transformar IA Coach em assistente de corrida, caminhada e exercícios.
+- [x] Adicionar configuração segura de provedores de IA: Manus, OpenAI, Groq, Gemini e Claude.
+- [x] Acelerar a atualização de posição, distância e ritmo no cardio.
+- [x] Corrigir a captura de passos com fallback mais confiável.
+- [ ] Validar e publicar uma nova release Android com as melhorias.
