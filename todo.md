@@ -68,3 +68,11 @@
 - [x] Gerar e anexar o APK corrigido v2.3.0 na release pública do GitHub.
 - [x] Atualizar o README para apontar para o APK v2.3.0.
 - [x] Confirmar o download público e a estrutura Android nativa do APK.
+
+## Correção do IA Coach com Groq
+
+- [x] Diagnosticar por que a chave Groq salva está falhando na chamada.
+- [x] Adicionar seleção dos modelos Groq disponíveis e compatíveis com chat.
+- [x] Corrigir a chamada de conversa e mensagens de erro da API.
+- [x] Corrigir contraste e visibilidade do texto digitado no campo do IA Coach.
+- [ ] Validar e publicar a nova versão Android 2.4.0.

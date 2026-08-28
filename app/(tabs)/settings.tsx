@@ -5,7 +5,7 @@ import MaterialIcons from "@expo/vector-icons/MaterialIcons";
 
 import { Card, SectionHeading, forjaColors } from "@/components/forja-ui";
 import { ScreenContainer } from "@/components/screen-container";
-import { AI_PROVIDER_LABEL, DEFAULT_AI_MODEL } from "@/lib/forja/ai-coach";
+import { AI_PROVIDER_LABEL, DEFAULT_AI_MODEL, GROQ_CHAT_MODELS } from "@/lib/forja/ai-coach";
 import { readAiApiKey, removeAiApiKey, saveAiApiKey } from "@/lib/forja/ai-storage";
 import { useForja } from "@/lib/forja/forja-context";
 import type { AIProvider } from "@/lib/forja/types";
@@ -20,6 +20,7 @@ const PROVIDERS: { id: AIProvider; icon: "auto-awesome" | "smart-toy" | "bolt" |
 
 export default function SettingsScreen() {
   const { preferences, sessions, updatePreferences, clearSessions } = useForja();
+  const [testingConnection, setTestingConnection] = useState(false);
   const [stepLength, setStepLength] = useState(String(preferences.stepLengthM).replace(".", ","));
   const [apiKey, setApiKey] = useState("");
   const [keySaved, setKeySaved] = useState(false);
@@ -60,6 +61,24 @@ export default function SettingsScreen() {
     setApiKey("");
     setKeySaved(false);
     await updatePreferences({ aiProvider: provider, aiModel: DEFAULT_AI_MODEL[provider] });
+  }
+
+  async function testGroqConnection() {
+    const cleanModel = model.trim() || DEFAULT_AI_MODEL.groq;
+    if (!apiKey.trim() && !keySaved) {
+      Alert.alert("Chave necessária", "Cole a chave Groq antes de testar a conexão.");
+      return;
+    }
+    setTestingConnection(true);
+    try {
+      const { testAiProvider } = await import("@/lib/forja/ai-coach");
+      await testAiProvider({ provider: "groq", apiKey: apiKey.trim() || undefined, model: cleanModel });
+      Alert.alert("Groq conectado", `A chave e o modelo ${cleanModel} responderam corretamente.`);
+    } catch (reason) {
+      Alert.alert("Erro na Groq", reason instanceof Error ? reason.message : "A Groq não respondeu. Confira a chave e o modelo.");
+    } finally {
+      setTestingConnection(false);
+    }
   }
 
   async function saveAiConfig() {
@@ -123,7 +142,16 @@ export default function SettingsScreen() {
             </Pressable>
           </View>
           <Text style={styles.fieldLabel}>Modelo</Text>
+          {preferences.aiProvider === "groq" ? (
+            <View style={styles.modelGrid}>
+              {GROQ_CHAT_MODELS.map((item) => {
+                const active = item.id === model;
+                return <Pressable key={item.id} accessibilityRole="button" onPress={() => setModel(item.id)} style={({ pressed }) => [styles.modelChip, active && styles.modelChipActive, pressed && styles.modelChipPressed]}><Text style={[styles.modelChipLabel, active && styles.modelChipLabelActive]}>{item.label}</Text><Text style={[styles.modelChipId, active && styles.modelChipIdActive]}>{item.id}</Text></Pressable>;
+              })}
+            </View>
+          ) : null}
           <TextInput accessibilityLabel="Modelo de IA" autoCapitalize="none" autoCorrect={false} onChangeText={setModel} placeholder={DEFAULT_AI_MODEL[preferences.aiProvider]} placeholderTextColor={forjaColors.muted} style={styles.modelInput} value={model} />
+          {preferences.aiProvider === "groq" ? <Pressable accessibilityRole="button" disabled={testingConnection} onPress={() => void testGroqConnection()} style={({ pressed }) => [styles.testAiButton, testingConnection && styles.testAiButtonDisabled, pressed && styles.saveAiButtonPressed]}><MaterialIcons color={forjaColors.lime} name="wifi-tethering" size={18} /><Text style={styles.testAiText}>{testingConnection ? "Testando Groq…" : "Testar conexão Groq"}</Text></Pressable> : null}
           <Pressable accessibilityRole="button" onPress={() => void saveAiConfig()} style={({ pressed }) => [styles.saveAiButton, pressed && styles.saveAiButtonPressed]}>
             <MaterialIcons color={forjaColors.background} name="lock" size={18} />
             <Text style={styles.saveAiText}>Salvar configuração de IA</Text>
@@ -137,7 +165,7 @@ export default function SettingsScreen() {
           <View style={styles.settingRow}>
             <View style={styles.settingCopy}>
               <Text style={styles.settingTitle}>Usar pedômetro do aparelho</Text>
-              <Text style={styles.settingBody}>Prioriza o sensor nativo de passos. Quando indisponível, o Forja estima por distância.</Text>
+              <Text style={styles.settingBody}>Usa somente o sensor nativo de passos. Se ele estiver indisponível, o contador não inventa passos.</Text>
             </View>
             <Switch accessibilityLabel="Usar pedômetro do aparelho" onValueChange={(value) => void updatePreferences({ usePedometer: value })} thumbColor={preferences.usePedometer ? forjaColors.background : forjaColors.muted} trackColor={{ false: forjaColors.border, true: forjaColors.lime }} value={preferences.usePedometer} />
           </View>
@@ -145,7 +173,7 @@ export default function SettingsScreen() {
           <View style={styles.stepRow}>
             <View style={styles.settingCopy}>
               <Text style={styles.settingTitle}>Comprimento médio do passo</Text>
-              <Text style={styles.settingBody}>Usado somente na estimativa sem pedômetro.</Text>
+              <Text style={styles.settingBody}>Referência para métricas de movimento e futuras estimativas.</Text>
             </View>
             <View style={styles.stepInputWrap}>
               <TextInput accessibilityLabel="Comprimento médio do passo em metros" keyboardType="decimal-pad" onBlur={saveStepLength} onChangeText={setStepLength} returnKeyType="done" style={styles.stepInput} value={stepLength} />
@@ -205,7 +233,18 @@ const styles = StyleSheet.create({
   eyeButton: { alignItems: "center", height: 46, justifyContent: "center", width: 45 },
   eyeButtonPressed: { opacity: 0.65 },
   fieldLabel: { color: forjaColors.muted, fontSize: 11, fontWeight: "800", letterSpacing: 0.5, marginBottom: -7, textTransform: "uppercase" },
+  modelGrid: { gap: 8 },
+  modelChip: { backgroundColor: forjaColors.surfaceElevated, borderColor: forjaColors.border, borderRadius: 12, borderWidth: 1, padding: 10 },
+  modelChipActive: { backgroundColor: "rgba(185, 242, 39, 0.14)", borderColor: forjaColors.lime },
+  modelChipPressed: { opacity: 0.75 },
+  modelChipLabel: { color: forjaColors.text, fontSize: 12, fontWeight: "800" },
+  modelChipLabelActive: { color: forjaColors.lime },
+  modelChipId: { color: forjaColors.muted, fontSize: 10, marginTop: 3 },
+  modelChipIdActive: { color: forjaColors.lime },
   modelInput: { backgroundColor: forjaColors.surfaceElevated, borderColor: forjaColors.border, borderRadius: 13, borderWidth: 1, color: forjaColors.text, fontSize: 13, minHeight: 48, paddingHorizontal: 12, paddingVertical: 12 },
+  testAiButton: { alignItems: "center", borderColor: forjaColors.lime, borderRadius: 14, borderWidth: 1, flexDirection: "row", gap: 9, justifyContent: "center", minHeight: 46, paddingHorizontal: 14 },
+  testAiButtonDisabled: { opacity: 0.55 },
+  testAiText: { color: forjaColors.lime, fontSize: 13, fontWeight: "900" },
   saveAiButton: { alignItems: "center", backgroundColor: forjaColors.lime, borderRadius: 14, flexDirection: "row", gap: 9, justifyContent: "center", minHeight: 48, paddingHorizontal: 14 },
   saveAiButtonPressed: { opacity: 0.86, transform: [{ scale: 0.98 }] },
   saveAiText: { color: forjaColors.background, fontSize: 14, fontWeight: "900" },

@@ -110,7 +110,10 @@ export default function CoachScreen() {
             onSubmitEditing={() => void sendQuestion()}
             placeholder="Ex.: Como preparo uma corrida de 5 km?"
             placeholderTextColor={forjaColors.muted}
+            selectionColor={forjaColors.lime}
+            cursorColor={forjaColors.lime}
             returnKeyType="send"
+            scrollEnabled
             style={styles.input}
             value={draft}
           />
@@ -159,7 +162,7 @@ const styles = StyleSheet.create({
   safetyCard: { alignItems: "flex-start", flexDirection: "row", gap: 10, marginTop: 10 },
   safetyText: { color: forjaColors.muted, flex: 1, fontSize: 12, lineHeight: 18 },
   composer: { alignItems: "flex-end", backgroundColor: forjaColors.surface, borderTopColor: forjaColors.border, borderTopWidth: 1, flexDirection: "row", gap: 10, paddingHorizontal: 16, paddingVertical: 12 },
-  input: { backgroundColor: forjaColors.surfaceElevated, borderColor: forjaColors.border, borderRadius: 17, borderWidth: 1, color: forjaColors.text, flex: 1, fontSize: 14, lineHeight: 19, maxHeight: 112, minHeight: 48, paddingHorizontal: 14, paddingVertical: 12 },
+  input: { backgroundColor: "#242A27", borderColor: forjaColors.lime, borderRadius: 17, borderWidth: 1, color: "#FFFFFF", flex: 1, fontSize: 16, fontWeight: "600", lineHeight: 22, maxHeight: 112, minHeight: 48, paddingHorizontal: 14, paddingVertical: 12, textAlignVertical: "top" },
   sendButton: { alignItems: "center", backgroundColor: forjaColors.lime, borderRadius: 16, height: 48, justifyContent: "center", width: 48 },
   sendButtonDisabled: { opacity: 0.35 },
   sendButtonPressed: { opacity: 0.82, transform: [{ scale: 0.96 }] },

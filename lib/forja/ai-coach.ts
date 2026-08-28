@@ -12,10 +12,23 @@ export const AI_PROVIDER_LABEL: Record<AIProvider, string> = {
 export const DEFAULT_AI_MODEL: Record<AIProvider, string> = {
   manus: "manus-1.6-lite",
   openai: "gpt-4.1-mini",
-  groq: "llama-3.3-70b-versatile",
+  groq: "openai/gpt-oss-120b",
   gemini: "gemini-2.5-flash",
   claude: "claude-sonnet-4-6",
 };
+
+/** Modelos Groq atualmente adequados para conversa de texto no Forja. */
+export const GROQ_CHAT_MODELS = [
+  { id: "openai/gpt-oss-120b", label: "GPT OSS 120B" },
+  { id: "openai/gpt-oss-20b", label: "GPT OSS 20B" },
+  { id: "llama-3.3-70b-versatile", label: "Llama 3.3 70B" },
+  { id: "llama-3.1-8b-instant", label: "Llama 3.1 8B Instant" },
+  { id: "groq/compound", label: "Groq Compound" },
+  { id: "groq/compound-mini", label: "Groq Compound Mini" },
+  { id: "qwen/qwen3.8-27b", label: "Qwen 3.8 27B" },
+  { id: "qwen/qwen3.6-27b", label: "Qwen 3.6 27B" },
+  { id: "minimaxai/minimax-m2.7", label: "MiniMax M2.7" },
+] as const;
 
 const COACH_INSTRUCTION = `Você é o Forja Coach, um assistente brasileiro especializado em corrida, caminhada e exercícios físicos gerais. Responda em português claro, acolhedor e objetivo. Dê sugestões progressivas, adaptáveis ao nível de experiência e com foco em técnica, consistência, descanso e segurança. Não diagnostique doenças, não substitua profissionais de saúde e não prescreva medicamentos. Diante de dor no peito, desmaio, falta de ar intensa, dor aguda, lesão persistente ou qualquer sinal preocupante, recomende interromper a atividade e buscar atendimento profissional. Faça perguntas breves quando dados essenciais estiverem faltando.`;
 
@@ -58,7 +71,10 @@ function readableError(payload: unknown, fallback: string): string {
 
 async function parseResponse(response: Response, fallback: string): Promise<any> {
   const payload = await response.json().catch(() => null);
-  if (!response.ok) throw new Error(readableError(payload, fallback));
+  if (!response.ok) {
+    const detail = readableError(payload, `${fallback} (HTTP ${response.status})`);
+    throw new Error(`${detail} (HTTP ${response.status})`);
+  }
   return payload;
 }
 
@@ -70,7 +86,8 @@ async function requestOpenAiCompatible(baseUrl: string, apiKey: string, model: s
       model,
       messages: [{ role: "system", content: COACH_INSTRUCTION }, ...limitedMessages(messages)],
       temperature: 0.45,
-      max_completion_tokens: 650,
+      ...(baseUrl.includes("api.groq.com") ? { max_tokens: 650 } : { max_completion_tokens: 650 }),
+      stream: false,
     }),
   });
   const payload = await parseResponse(response, "Não foi possível obter a resposta do provedor de IA.");
@@ -173,6 +190,13 @@ async function requestManus(apiKey: string, profile: string, messages: ProviderM
     if (candidate) return candidate;
   }
   throw new Error("O Manus demorou mais que o esperado. Tente novamente em instantes.");
+}
+
+export async function testAiProvider({ provider, apiKey, model }: { provider: AIProvider; apiKey?: string; model: string }): Promise<void> {
+  const key = apiKey?.trim() || await readAiApiKey(provider);
+  if (!key) throw new Error(`Nenhuma chave de API de ${AI_PROVIDER_LABEL[provider]} foi encontrada.`);
+  if (provider !== "groq") throw new Error("O teste rápido está disponível para a Groq nesta versão.");
+  await requestOpenAiCompatible("https://api.groq.com/openai/v1", key, model, [{ role: "user", content: "Responda apenas: OK" }]);
 }
 
 export async function askCoach({ preferences, messages, sessions }: ChatRequest): Promise<string> {
