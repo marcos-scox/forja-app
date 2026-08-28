@@ -75,4 +75,4 @@
 - [x] Adicionar seleção dos modelos Groq disponíveis e compatíveis com chat.
 - [x] Corrigir a chamada de conversa e mensagens de erro da API.
 - [x] Corrigir contraste e visibilidade do texto digitado no campo do IA Coach.
-- [ ] Validar e publicar a nova versão Android 2.4.0.
+- [x] Validar e publicar a nova versão Android 2.4.0.
