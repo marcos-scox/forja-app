@@ -7,7 +7,7 @@ export type RoutePoint = {
   accuracy?: number | null;
 };
 
-export type StepSource = "sensor" | "estimativa";
+export type StepSource = "sensor" | "estimativa" | "indisponivel";
 
 export type AIProvider = "manus" | "openai" | "groq" | "gemini" | "claude";
 

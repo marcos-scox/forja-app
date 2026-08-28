@@ -48,3 +48,17 @@
 - [x] Adicionar captura ou seleção de selfie ao finalizar uma corrida.
 - [x] Persistir e exibir a selfie no detalhe da sessão do histórico.
 - [x] Validar permissões de câmera/galeria, testes, export Android e publicar a release v2.2.0.
+
+## Correção de passos parados
+
+- [x] Impedir o fallback de distância incremente passos quando o pedômetro não estiver ativo.
+- [x] Filtrar oscilações de GPS por precisão, deslocamento mínimo e velocidade plausível.
+- [x] Adicionar testes para sessão parada, pausa e leitura real do pedômetro.
+- [ ] Publicar a correção no GitHub e gerar a próxima release Android.
+
+## Correção de passos e foto no calendário
+
+- [x] Impedir qualquer estimativa de passos baseada em ruído de GPS quando o pedômetro não estiver ativo.
+- [x] Exibir a selfie salva como foto destaque no dia correspondente do calendário.
+- [x] Permitir abrir a foto do dia em tamanho maior e manter o histórico da sessão.
+- [ ] Testar, sincronizar e publicar a nova versão Android.

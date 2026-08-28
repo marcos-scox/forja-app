@@ -133,7 +133,7 @@ export default function CardioScreen() {
           <View style={styles.metricsRow}>
             <Metric label="ritmo" suffix="/km" value={formatPace(currentPace)} />
             <View style={styles.metricDivider} />
-            <Metric label={draft?.stepSource === "sensor" ? "passos" : "passos estimados"} value={(draft?.steps ?? 0).toLocaleString("pt-BR")} />
+            <Metric label={draft?.stepSource === "sensor" ? "passos reais" : draft?.stepSource === "indisponivel" ? "sensor indisponível" : "passos estimados"} value={draft?.stepSource === "indisponivel" ? "—" : (draft?.steps ?? 0).toLocaleString("pt-BR")} />
           </View>
         </View>
 

@@ -2,7 +2,7 @@ import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import * as Location from "expo-location";
 import { Pedometer } from "expo-sensors";
 
-import { averagePaceSecPerKm, createId, distanceBetweenMeters, elapsedMs, estimateSteps } from "@/lib/forja/metrics";
+import { averagePaceSecPerKm, createId, distanceBetweenMeters, elapsedMs } from "@/lib/forja/metrics";
 import type { CardioMode, CardioSession, ForjaPreferences, LiveCardioSession, RoutePoint } from "@/lib/forja/types";
 
 type Subscription = { remove: () => void };
@@ -50,14 +50,14 @@ export function useCardioTracker(preferences: ForjaPreferences) {
     try {
       const isAvailable = await Pedometer.isAvailableAsync();
       if (!isAvailable) {
-        updateDraft((current) => ({ ...current, stepSource: "estimativa" }));
+        updateDraft((current) => ({ ...current, stepSource: "indisponivel", steps: 0 }));
         return;
       }
 
       const existingPermission = await Pedometer.getPermissionsAsync();
       const permission = existingPermission.granted ? existingPermission : await Pedometer.requestPermissionsAsync();
       if (!permission.granted) {
-        updateDraft((current) => ({ ...current, stepSource: "estimativa" }));
+        updateDraft((current) => ({ ...current, stepSource: "indisponivel", steps: 0 }));
         return;
       }
 
@@ -74,7 +74,7 @@ export function useCardioTracker(preferences: ForjaPreferences) {
         });
       });
     } catch {
-      updateDraft((current) => ({ ...current, stepSource: "estimativa" }));
+      updateDraft((current) => ({ ...current, stepSource: "indisponivel", steps: 0 }));
     }
   }, [preferences.usePedometer, stopPedometer, updateDraft]);
 
@@ -109,12 +109,11 @@ export function useCardioTracker(preferences: ForjaPreferences) {
 
         const distanceM = current.distanceM + segmentM;
         const route = [...current.route, nextPoint].slice(-5_000);
-        const estimatedSteps = estimateSteps(distanceM, preferences.stepLengthM);
         return {
           ...withPosition,
           distanceM,
           route,
-          steps: current.stepSource === "sensor" ? Math.max(current.steps, estimatedSteps) : estimatedSteps,
+          steps: current.steps,
         };
       });
     },
@@ -150,7 +149,7 @@ export function useCardioTracker(preferences: ForjaPreferences) {
           elapsedBeforePauseMs: 0,
           distanceM: 0,
           steps: 0,
-          stepSource: "estimativa",
+          stepSource: "indisponivel",
           route: [initialPoint],
           currentLocation: initialPoint,
           locationAccuracy: initialPoint.accuracy ?? null,
@@ -202,7 +201,6 @@ export function useCardioTracker(preferences: ForjaPreferences) {
     }
 
     const durationMs = elapsedMs(live);
-    const estimatedSteps = estimateSteps(live.distanceM, preferences.stepLengthM);
     const session: CardioSession = {
       id: createId("cardio"),
       mode: live.mode,
@@ -211,7 +209,7 @@ export function useCardioTracker(preferences: ForjaPreferences) {
       durationMs,
       distanceM: live.distanceM,
       averagePaceSecPerKm: averagePaceSecPerKm(durationMs, live.distanceM),
-      steps: live.stepSource === "sensor" ? live.steps : estimatedSteps,
+      steps: live.stepSource === "sensor" ? live.steps : 0,
       stepSource: live.stepSource,
       route: live.route,
     };

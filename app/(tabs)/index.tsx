@@ -1,7 +1,7 @@
 import MaterialIcons from "@expo/vector-icons/MaterialIcons";
 import { router, type Href } from "expo-router";
 import { useMemo, useState } from "react";
-import { Pressable, ScrollView, StyleSheet, Text, View } from "react-native";
+import { Image, Modal, Pressable, ScrollView, StyleSheet, Text, View } from "react-native";
 
 import { Card, Metric, SectionHeading, forjaColors } from "@/components/forja-ui";
 import { ScreenContainer } from "@/components/screen-container";
@@ -14,8 +14,17 @@ const weekDays = ["D", "S", "T", "Q", "Q", "S", "S"];
 export default function TrainingScreen() {
   const { hydrated, sessions } = useForja();
   const [visibleMonth, setVisibleMonth] = useState(() => new Date());
+  const [selectedPhoto, setSelectedPhoto] = useState<string | null>(null);
   const totalDistance = sessions.reduce((sum, session) => sum + session.distanceM, 0);
   const totalDuration = sessions.reduce((sum, session) => sum + session.durationMs, 0);
+  const runPhotoByDay = useMemo(() => {
+    const photos = new Map<string, string>();
+    sessions.filter((session) => session.mode === "corrida").forEach((session) => {
+      const dayKey = localDateKey(new Date(session.createdAt));
+      if (session.selfieUri && !photos.has(dayKey)) photos.set(dayKey, session.selfieUri);
+    });
+    return photos;
+  }, [sessions]);
   const runDays = useMemo(() => new Set(sessions.filter((session) => session.mode === "corrida").map((session) => localDateKey(new Date(session.createdAt)))), [sessions]);
   const daysInMonth = new Date(visibleMonth.getFullYear(), visibleMonth.getMonth() + 1, 0).getDate();
   const firstDay = new Date(visibleMonth.getFullYear(), visibleMonth.getMonth(), 1).getDay();
@@ -64,7 +73,8 @@ export default function TrainingScreen() {
               const key = localDateKey(new Date(visibleMonth.getFullYear(), visibleMonth.getMonth(), day));
               const hasRun = runDays.has(key);
               const isToday = key === localDateKey(new Date());
-              return <View key={key} style={styles.dayCell}><View style={[styles.dayCircle, isToday && styles.todayCircle, hasRun && styles.runCircle]}><Text style={[styles.dayText, hasRun && styles.runText, isToday && !hasRun && styles.todayText]}>{day}</Text></View>{hasRun ? <View style={styles.runDot} /> : null}</View>;
+              const photoUri = runPhotoByDay.get(key);
+              return <View key={key} style={styles.dayCell}><Pressable accessibilityLabel={photoUri ? `Abrir selfie do dia ${day}` : `Dia ${day}`} accessibilityRole={photoUri ? "button" : undefined} disabled={!photoUri} onPress={() => photoUri && setSelectedPhoto(photoUri)}><View style={[styles.dayCircle, isToday && styles.todayCircle, hasRun && styles.runCircle, photoUri && styles.photoCircle]}>{photoUri ? <Image accessibilityLabel={`Selfie da corrida do dia ${day}`} source={{ uri: photoUri }} style={styles.dayPhoto} /> : null}{photoUri ? <View style={styles.dayPhotoShade} /> : null}<Text style={[styles.dayText, hasRun && styles.runText, photoUri && styles.photoDayText, isToday && !hasRun && styles.todayText]}>{day}</Text></View></Pressable>{hasRun ? <View style={styles.runDot} /> : null}</View>;
             })}
           </View>
           <View style={styles.calendarLegend}><View style={styles.legendItem}><View style={styles.legendDot} /><Text style={styles.legendText}>Corrida registrada</Text></View><Text style={styles.runCount}>{sessions.filter((session) => session.mode === "corrida" && new Date(session.createdAt).getMonth() === visibleMonth.getMonth() && new Date(session.createdAt).getFullYear() === visibleMonth.getFullYear()).length} neste mês</Text></View>
@@ -77,6 +87,12 @@ export default function TrainingScreen() {
           <Pressable accessibilityRole="button" onPress={() => router.push("/cardio" as Href)} style={({ pressed }) => [styles.arrowButton, pressed && styles.arrowButtonPressed]}><MaterialIcons color={forjaColors.background} name="arrow-forward" size={21} /></Pressable>
         </Card>
       </ScrollView>
+      <Modal animationType="fade" onRequestClose={() => setSelectedPhoto(null)} transparent visible={Boolean(selectedPhoto)}>
+        <Pressable accessibilityLabel="Fechar selfie ampliada" accessibilityRole="button" onPress={() => setSelectedPhoto(null)} style={styles.photoModalBackdrop}>
+          {selectedPhoto ? <Image accessibilityLabel="Selfie ampliada da corrida" resizeMode="contain" source={{ uri: selectedPhoto }} style={styles.photoModalImage} /> : null}
+          <Text style={styles.photoModalHint}>Toque para fechar</Text>
+        </Pressable>
+      </Modal>
     </ScreenContainer>
   );
 }
@@ -107,7 +123,14 @@ const styles = StyleSheet.create({
   weekDay: { color: forjaColors.muted, flex: 1, fontSize: 11, fontWeight: "800", textAlign: "center" },
   calendarGrid: { flexDirection: "row", flexWrap: "wrap", marginTop: 8 },
   dayCell: { alignItems: "center", height: 46, justifyContent: "flex-start", width: "14.2857%" },
-  dayCircle: { alignItems: "center", borderRadius: 18, height: 34, justifyContent: "center", width: 34 },
+  dayCircle: { alignItems: "center", borderRadius: 18, height: 34, justifyContent: "center", overflow: "hidden", width: 34 },
+  photoCircle: { borderColor: forjaColors.lime, borderWidth: 2 },
+  dayPhoto: { height: "100%", left: 0, position: "absolute", top: 0, width: "100%" },
+  dayPhotoShade: { backgroundColor: "rgba(0,0,0,0.35)", height: "100%", position: "absolute", width: "100%" },
+  photoDayText: { color: "#FFFFFF", fontWeight: "900" },
+  photoModalBackdrop: { alignItems: "center", backgroundColor: "rgba(0,0,0,0.92)", flex: 1, justifyContent: "center", padding: 24 },
+  photoModalImage: { borderRadius: 22, height: "78%", width: "100%" },
+  photoModalHint: { color: "#FFFFFF", fontSize: 12, fontWeight: "700", marginTop: 14 },
   todayCircle: { borderColor: forjaColors.lime, borderWidth: 1 },
   runCircle: { backgroundColor: forjaColors.lime },
   dayText: { color: forjaColors.text, fontSize: 12, fontWeight: "700" },
