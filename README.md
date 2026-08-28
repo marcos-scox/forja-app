@@ -31,11 +31,11 @@ O rastreamento de localização e o pedômetro requerem um dispositivo físico c
 
 O APK da versão **Expo/React Native** é gerado e hospedado pelo próprio GitHub. A versão nativa atual está disponível aqui:
 
-[**Baixar FORJA v2.0.0 para Android**](https://github.com/marcos-scox/forja-app/releases/download/v2.0.0/FORJA-v2.0.0.apk)
+[**Baixar FORJA v2.1.0 para Android**](https://github.com/marcos-scox/forja-app/releases/download/v2.1.0/FORJA-v2.1.0.apk)
 
 No repositório, abra a aba **Actions**, selecione **Gerar APK Android nativo** e use **Run workflow** para gerar versões futuras. Ao finalizar, o GitHub cria a release escolhida e anexa o arquivo `FORJA-vX.Y.Z.apk` para download.
 
-> **Não use o APK da release `v1.0.0`**, pois ele pertence à antiga versão web/PWA. Use a release `v2.0.0` ou superior para instalar o aplicativo mobile nativo.
+> **Não use o APK da release `v1.0.0`**, pois ele pertence à antiga versão web/PWA. Use a release `v2.1.0` ou superior para instalar o aplicativo mobile nativo.
 
 O primeiro APK é assinado para distribuição de teste e pode ser instalado diretamente em aparelhos Android. Para publicar em lojas, configure uma chave de assinatura de produção nas credenciais do repositório antes de gerar uma release de distribuição final.
 
