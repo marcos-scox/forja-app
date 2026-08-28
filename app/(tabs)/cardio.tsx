@@ -1,5 +1,6 @@
 import MaterialIcons from "@expo/vector-icons/MaterialIcons";
 import { activateKeepAwake, deactivateKeepAwake } from "expo-keep-awake";
+import * as ImagePicker from "expo-image-picker";
 import { router, type Href } from "expo-router";
 import { useEffect, useState } from "react";
 import { Alert, Platform, Pressable, ScrollView, StyleSheet, Text, View } from "react-native";
@@ -8,6 +9,7 @@ import { Card, Metric, PrimaryButton, SectionHeading, StatusChip, forjaColors } 
 import { LeafletMap } from "@/components/map/leaflet-map";
 import { ScreenContainer } from "@/components/screen-container";
 import { formatDistance, formatDuration, formatPace } from "@/lib/forja/metrics";
+import { persistSelfie } from "@/lib/forja/selfie";
 import { useForja } from "@/lib/forja/forja-context";
 import type { CardioMode } from "@/lib/forja/types";
 import { useCardioTracker } from "@/hooks/use-cardio-tracker";
@@ -38,11 +40,42 @@ export default function CardioScreen() {
 
   function handleFinish() {
     const session = finish();
-    if (!session) {
-      return;
+    if (!session) return;
+
+    Alert.alert("Corrida finalizada", "Quer guardar uma selfie junto desta sessão?", [
+      { text: "Agora não", onPress: () => void saveSession(session) },
+      { text: "Escolher da galeria", onPress: () => void chooseSelfie(session, "gallery") },
+      { text: "Tirar selfie", onPress: () => void chooseSelfie(session, "camera") },
+    ]);
+  }
+
+  async function chooseSelfie(session: NonNullable<ReturnType<typeof finish>>, source: "camera" | "gallery") {
+    try {
+      let result: ImagePicker.ImagePickerResult;
+      if (source === "camera") {
+        const permission = await ImagePicker.requestCameraPermissionsAsync();
+        if (!permission.granted) {
+          Alert.alert("Câmera não autorizada", "Você pode salvar a corrida sem selfie ou liberar a câmera nos ajustes do aparelho.", [{ text: "Salvar sem selfie", onPress: () => void saveSession(session) }]);
+          return;
+        }
+        result = await ImagePicker.launchCameraAsync({ allowsEditing: true, aspect: [4, 5], cameraType: ImagePicker.CameraType.front, quality: 0.82 });
+      } else {
+        result = await ImagePicker.launchImageLibraryAsync({ allowsEditing: true, aspect: [4, 5], mediaTypes: ["images"], quality: 0.82 });
+      }
+      if (result.canceled || !result.assets[0]?.uri) {
+        Alert.alert("Selfie não selecionada", "A corrida ainda pode ser salva sem foto.", [{ text: "Salvar sem selfie", onPress: () => void saveSession(session) }]);
+        return;
+      }
+      await saveSession(session, result.assets[0].uri);
+    } catch {
+      Alert.alert("Não foi possível salvar a selfie", "A corrida ainda pode ser salva sem foto.", [{ text: "Salvar sem selfie", onPress: () => void saveSession(session) }]);
     }
-    void addSession(session);
-    Alert.alert("Sessão salva", "Sua rota e suas métricas foram armazenadas neste aparelho.", [
+  }
+
+  async function saveSession(session: NonNullable<ReturnType<typeof finish>>, selfieUri?: string) {
+    const storedSelfieUri = selfieUri ? await persistSelfie(selfieUri, session.id) : null;
+    await addSession({ ...session, selfieUri: storedSelfieUri });
+    Alert.alert("Sessão salva", storedSelfieUri ? "Sua corrida e sua selfie foram armazenadas neste aparelho." : "Sua rota e suas métricas foram armazenadas neste aparelho.", [
       { text: "Continuar" },
       { text: "Ver histórico", onPress: () => router.navigate("/history" as Href) },
     ]);

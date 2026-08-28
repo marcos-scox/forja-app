@@ -41,7 +41,7 @@ const env = {
 const config: ExpoConfig = {
   name: env.appName,
   slug: env.appSlug,
-  version: "2.1.0",
+  version: "2.2.0",
   orientation: "portrait",
   icon: "./assets/images/icon.png",
   scheme: env.scheme,
@@ -64,7 +64,7 @@ const config: ExpoConfig = {
     edgeToEdgeEnabled: true,
     predictiveBackGestureEnabled: false,
     package: env.androidPackage,
-    versionCode: 2,
+    versionCode: 3,
     permissions: ["ACCESS_COARSE_LOCATION", "ACCESS_FINE_LOCATION", "ACTIVITY_RECOGNITION"],
     intentFilters: [
       {
@@ -91,6 +91,13 @@ const config: ExpoConfig = {
       "expo-location",
       {
         locationWhenInUsePermission: "Permita que o Forja use sua localização para registrar seu trajeto de cardio.",
+      },
+    ],
+    [
+      "expo-image-picker",
+      {
+        photosPermission: "Permita que o Forja acesse suas fotos para anexar uma selfie à corrida.",
+        cameraPermission: "Permita que o Forja use a câmera para registrar sua selfie pós-corrida.",
       },
     ],
     [

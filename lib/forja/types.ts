@@ -28,6 +28,7 @@ export type CardioSession = {
   steps: number;
   stepSource: StepSource;
   route: RoutePoint[];
+  selfieUri?: string | null;
 };
 
 export type LiveCardioSession = {

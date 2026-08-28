@@ -23,9 +23,28 @@
 - [x] Configurar uma automação no GitHub para compilar e publicar o APK Android nativo.
 - [x] Adicionar o workflow GitHub Actions para gerar o APK Android com Gradle.
 - [x] Executar o workflow, validar o APK gerado e anexá-lo a uma nova release GitHub.
+- [x] Recuperar no projeto ativo as alterações de IA Coach e cardio já enviadas ao GitHub.
+- [x] Revalidar o projeto ativo recuperado e salvar um novo checkpoint antes da próxima release.
+- [x] Gerar a release Android v2.1.0 a partir do checkpoint recuperado.
+
+## Melhoria de precisão do cardio
+
 - [x] Remover o card de treino diário da tela inicial.
 - [x] Transformar IA Coach em assistente de corrida, caminhada e exercícios.
 - [x] Adicionar configuração segura de provedores de IA: Manus, OpenAI, Groq, Gemini e Claude.
 - [x] Acelerar a atualização de posição, distância e ritmo no cardio.
 - [x] Corrigir a captura de passos com fallback mais confiável.
-- [ ] Validar e publicar uma nova release Android com as melhorias.
+- [x] Validar testes, tipos, lint e export Android da melhoria.
+
+## Correção do README público
+
+- [x] Corrigir o link v2.0.0 exibido no README público para apontar para o APK v2.1.0.
+- [x] Confirmar a leitura do README diretamente no GitHub após o push.
+
+## Agenda e selfie pós-corrida
+
+- [x] Adicionar ao modelo de sessão a data local e a URI opcional da selfie.
+- [x] Criar agenda mensal na tela Treinos com dias de corrida destacados.
+- [x] Adicionar captura ou seleção de selfie ao finalizar uma corrida.
+- [x] Persistir e exibir a selfie no detalhe da sessão do histórico.
+- [x] Validar permissões de câmera/galeria, testes e export Android. A nova release continua pendente de publicação.

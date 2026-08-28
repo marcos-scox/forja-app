@@ -1,6 +1,6 @@
 import MaterialIcons from "@expo/vector-icons/MaterialIcons";
 import { useMemo, useState } from "react";
-import { Alert, FlatList, Pressable, StyleSheet, Text, View } from "react-native";
+import { Alert, FlatList, Image, Pressable, StyleSheet, Text, View } from "react-native";
 
 import { Card, Metric, SectionHeading, forjaColors } from "@/components/forja-ui";
 import { LeafletMap } from "@/components/map/leaflet-map";
@@ -102,6 +102,12 @@ function SessionCard({ session, expanded, onPress, onDelete }: { session: Cardio
           <Text style={styles.sessionMetricLabel}>ritmo /km</Text>
         </View>
       </View>
+      {expanded && session.selfieUri ? (
+        <View style={styles.selfieWrap}>
+          <Image accessibilityLabel="Selfie da corrida" source={{ uri: session.selfieUri }} style={styles.selfieImage} />
+          <Text style={styles.selfieCaption}>Selfie salva nesta sessão</Text>
+        </View>
+      ) : null}
       {expanded ? (
         <Pressable accessibilityRole="button" onPress={onDelete} style={({ pressed }) => [styles.deleteButton, pressed && styles.sessionPressed]}>
           <MaterialIcons color={forjaColors.danger} name="delete-outline" size={18} />
@@ -164,6 +170,9 @@ const styles = StyleSheet.create({
   sessionMetricUnit: { color: forjaColors.muted, fontSize: 11 },
   sessionMetricLabel: { color: forjaColors.muted, fontSize: 10, fontWeight: "700", marginTop: 4 },
   deleteButton: { alignItems: "center", flexDirection: "row", gap: 7, marginLeft: 57, marginTop: 15 },
+  selfieWrap: { marginLeft: 57, marginTop: 15 },
+  selfieImage: { borderRadius: 16, height: 210, width: "100%" },
+  selfieCaption: { color: forjaColors.muted, fontSize: 11, marginTop: 7 },
   deleteLabel: { color: forjaColors.danger, fontSize: 12, fontWeight: "800" },
   detailWrap: { marginTop: 22 },
   detailMap: { backgroundColor: forjaColors.map, borderColor: forjaColors.border, borderRadius: 20, borderWidth: 1, height: 230, overflow: "hidden" },
