@@ -54,11 +54,17 @@
 - [x] Impedir o fallback de distância incremente passos quando o pedômetro não estiver ativo.
 - [x] Filtrar oscilações de GPS por precisão, deslocamento mínimo e velocidade plausível.
 - [x] Adicionar testes para sessão parada, pausa e leitura real do pedômetro.
-- [ ] Publicar a correção no GitHub e gerar a próxima release Android.
+- [x] Publicar a correção no GitHub e gerar a próxima release Android.
 
 ## Correção de passos e foto no calendário
 
 - [x] Impedir qualquer estimativa de passos baseada em ruído de GPS quando o pedômetro não estiver ativo.
 - [x] Exibir a selfie salva como foto destaque no dia correspondente do calendário.
 - [x] Permitir abrir a foto do dia em tamanho maior e manter o histórico da sessão.
-- [ ] Testar, sincronizar e publicar a nova versão Android.
+- [x] Testar, sincronizar e publicar a nova versão Android.
+
+## APK v2.3.0 no GitHub
+
+- [x] Gerar e anexar o APK corrigido v2.3.0 na release pública do GitHub.
+- [x] Atualizar o README para apontar para o APK v2.3.0.
+- [x] Confirmar o download público e a estrutura Android nativa do APK.
