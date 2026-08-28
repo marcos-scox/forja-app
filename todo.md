@@ -47,4 +47,4 @@
 - [x] Criar agenda mensal na tela Treinos com dias de corrida destacados.
 - [x] Adicionar captura ou seleção de selfie ao finalizar uma corrida.
 - [x] Persistir e exibir a selfie no detalhe da sessão do histórico.
-- [x] Validar permissões de câmera/galeria, testes e export Android. A nova release continua pendente de publicação.
+- [x] Validar permissões de câmera/galeria, testes, export Android e publicar a release v2.2.0.
