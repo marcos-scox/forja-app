@@ -1,6 +1,7 @@
 import MaterialIcons from "@expo/vector-icons/MaterialIcons";
 import { activateKeepAwake, deactivateKeepAwake } from "expo-keep-awake";
 import * as ImagePicker from "expo-image-picker";
+import * as Location from "expo-location";
 import { router, type Href } from "expo-router";
 import { useEffect, useState } from "react";
 import { Alert, Platform, Pressable, ScrollView, StyleSheet, Text, View } from "react-native";
@@ -11,7 +12,7 @@ import { ScreenContainer } from "@/components/screen-container";
 import { formatDistance, formatDuration, formatPace } from "@/lib/forja/metrics";
 import { persistSelfie } from "@/lib/forja/selfie";
 import { useForja } from "@/lib/forja/forja-context";
-import type { CardioMode } from "@/lib/forja/types";
+import type { CardioMode, RoutePoint } from "@/lib/forja/types";
 import { useCardioTracker } from "@/hooks/use-cardio-tracker";
 
 const modes: { key: CardioMode; label: string; icon: "directions-run" | "directions-walk" | "directions-bike" }[] = [
@@ -23,7 +24,19 @@ const modes: { key: CardioMode; label: string; icon: "directions-run" | "directi
 export default function CardioScreen() {
   const { addSession, preferences } = useForja();
   const [mode, setMode] = useState<CardioMode>("corrida");
+  const [previewLocation, setPreviewLocation] = useState<RoutePoint | null>(null);
   const { draft, error, durationMs, currentPace, start, pause, resume, finish } = useCardioTracker(preferences);
+
+  useEffect(() => {
+    let mounted = true;
+    void Location.getLastKnownPositionAsync({ maxAge: 120_000, requiredAccuracy: 100 }).then((position) => {
+      if (!mounted || !position) return;
+      setPreviewLocation({ latitude: position.coords.latitude, longitude: position.coords.longitude, timestamp: position.timestamp, accuracy: position.coords.accuracy });
+    });
+    return () => {
+      mounted = false;
+    };
+  }, []);
 
   useEffect(() => {
     if (draft?.status === "running" && Platform.OS !== "web") {
@@ -116,7 +129,7 @@ export default function CardioScreen() {
         ) : null}
 
         <View style={styles.mapCard}>
-          <LeafletMap currentLocation={draft?.currentLocation} followUser={draft?.status === "running"} route={draft?.route ?? []} />
+          <LeafletMap currentLocation={draft?.currentLocation ?? previewLocation} followUser={draft?.status === "running"} route={draft?.route ?? []} />
           <View style={styles.mapBadge}>
             <View style={[styles.mapStatusDot, draft?.locationAccuracy && draft.locationAccuracy <= 30 ? styles.mapStatusDotActive : styles.mapStatusDotMuted]} />
             <Text style={styles.mapBadgeText}>{draft ? accuracyLabel : "Mapa pronto para o treino"}</Text>

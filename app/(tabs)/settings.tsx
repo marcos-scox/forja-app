@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { Alert, Pressable, ScrollView, StyleSheet, Switch, Text, TextInput, View } from "react-native";
+import { Alert, Pressable, ScrollView, StyleSheet, Text, TextInput, View } from "react-native";
 
 import MaterialIcons from "@expo/vector-icons/MaterialIcons";
 
@@ -164,10 +164,10 @@ export default function SettingsScreen() {
         <Card style={styles.settingsCard}>
           <View style={styles.settingRow}>
             <View style={styles.settingCopy}>
-              <Text style={styles.settingTitle}>Usar pedômetro do aparelho</Text>
-              <Text style={styles.settingBody}>Usa somente o sensor nativo de passos. Se ele estiver indisponível, o contador não inventa passos.</Text>
+              <Text style={styles.settingTitle}>Passos automáticos</Text>
+              <Text style={styles.settingBody}>Desativados nesta versão para evitar falsos positivos. Distância, rota e ritmo usam localização.</Text>
             </View>
-            <Switch accessibilityLabel="Usar pedômetro do aparelho" onValueChange={(value) => void updatePreferences({ usePedometer: value })} thumbColor={preferences.usePedometer ? forjaColors.background : forjaColors.muted} trackColor={{ false: forjaColors.border, true: forjaColors.lime }} value={preferences.usePedometer} />
+            <Text style={styles.disabledSetting}>Desativado</Text>
           </View>
           <View style={styles.divider} />
           <View style={styles.stepRow}>
@@ -225,6 +225,7 @@ const styles = StyleSheet.create({
   settingCopy: { flex: 1 },
   settingTitle: { color: forjaColors.text, fontSize: 15, fontWeight: "800" },
   settingBody: { color: forjaColors.muted, fontSize: 12, lineHeight: 18, marginTop: 4 },
+  disabledSetting: { color: forjaColors.muted, fontSize: 11, fontWeight: "800", textTransform: "uppercase" },
   divider: { backgroundColor: forjaColors.border, height: 1 },
   fieldHeader: { alignItems: "center", flexDirection: "row", gap: 10, justifyContent: "space-between" },
   savedTag: { color: forjaColors.lime, fontSize: 10, fontWeight: "900", letterSpacing: 0.7 },

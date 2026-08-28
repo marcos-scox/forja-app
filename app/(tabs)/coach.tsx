@@ -58,7 +58,7 @@ export default function CoachScreen() {
 
   return (
     <ScreenContainer containerClassName="bg-background">
-      <KeyboardAvoidingView behavior={Platform.OS === "ios" ? "padding" : undefined} style={styles.keyboardView}>
+        <KeyboardAvoidingView behavior={Platform.OS === "ios" ? "padding" : "height"} keyboardVerticalOffset={Platform.OS === "ios" ? 0 : 24} style={styles.keyboardView}>
         <FlatList
           ref={listRef}
           contentContainerStyle={styles.content}

@@ -1,6 +1,5 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import * as Location from "expo-location";
-import { Pedometer } from "expo-sensors";
 
 import { averagePaceSecPerKm, createId, distanceBetweenMeters, elapsedMs } from "@/lib/forja/metrics";
 import type { CardioMode, CardioSession, ForjaPreferences, LiveCardioSession, RoutePoint } from "@/lib/forja/types";
@@ -22,9 +21,6 @@ export function useCardioTracker(preferences: ForjaPreferences) {
   const [now, setNow] = useState(Date.now());
   const liveRef = useRef<LiveCardioSession | null>(null);
   const locationSubscription = useRef<Subscription | null>(null);
-  const pedometerSubscription = useRef<Subscription | null>(null);
-  const pedometerBase = useRef(0);
-  const lastPedometerReading = useRef(0);
 
   const updateDraft = useCallback((updater: (current: LiveCardioSession) => LiveCardioSession) => {
     const current = liveRef.current;
@@ -36,53 +32,10 @@ export function useCardioTracker(preferences: ForjaPreferences) {
     setDraft(next);
   }, []);
 
-  const stopPedometer = useCallback(() => {
-    pedometerSubscription.current?.remove();
-    pedometerSubscription.current = null;
-  }, []);
-
-  const beginPedometer = useCallback(async () => {
-    stopPedometer();
-    if (!preferences.usePedometer || !liveRef.current) {
-      return;
-    }
-
-    try {
-      const isAvailable = await Pedometer.isAvailableAsync();
-      if (!isAvailable) {
-        updateDraft((current) => ({ ...current, stepSource: "indisponivel", steps: 0 }));
-        return;
-      }
-
-      const existingPermission = await Pedometer.getPermissionsAsync();
-      const permission = existingPermission.granted ? existingPermission : await Pedometer.requestPermissionsAsync();
-      if (!permission.granted) {
-        updateDraft((current) => ({ ...current, stepSource: "indisponivel", steps: 0 }));
-        return;
-      }
-
-      pedometerBase.current = liveRef.current.steps;
-      lastPedometerReading.current = 0;
-      pedometerSubscription.current = Pedometer.watchStepCount(({ steps }) => {
-        updateDraft((current) => {
-          if (current.status !== "running") {
-            return current;
-          }
-          const normalizedSteps = Math.max(lastPedometerReading.current, steps);
-          lastPedometerReading.current = normalizedSteps;
-          return { ...current, steps: Math.max(current.steps, pedometerBase.current + normalizedSteps), stepSource: "sensor" };
-        });
-      });
-    } catch {
-      updateDraft((current) => ({ ...current, stepSource: "indisponivel", steps: 0 }));
-    }
-  }, [preferences.usePedometer, stopPedometer, updateDraft]);
-
   const stopAllTracking = useCallback(() => {
     locationSubscription.current?.remove();
     locationSubscription.current = null;
-    stopPedometer();
-  }, [stopPedometer]);
+  }, []);
 
   const receiveLocation = useCallback(
     (location: Location.LocationObject) => {
@@ -167,7 +120,7 @@ export function useCardioTracker(preferences: ForjaPreferences) {
           receiveLocation,
           () => setError("O sinal de localização foi interrompido. Confira o GPS e tente novamente."),
         );
-        await beginPedometer();
+        updateDraft((current) => ({ ...current, steps: 0, stepSource: "indisponivel" }));
         return true;
       } catch {
         setError("Não foi possível obter uma posição precisa. Aguarde o GPS estabilizar e tente novamente.");
@@ -177,7 +130,7 @@ export function useCardioTracker(preferences: ForjaPreferences) {
         return false;
       }
     },
-    [beginPedometer, preferences.usePedometer, receiveLocation, stopAllTracking],
+    [receiveLocation, stopAllTracking, updateDraft],
   );
 
   const pause = useCallback(() => {
@@ -186,13 +139,11 @@ export function useCardioTracker(preferences: ForjaPreferences) {
       status: "paused",
       elapsedBeforePauseMs: elapsedMs(current),
     }));
-    stopPedometer();
-  }, [stopPedometer, updateDraft]);
+  }, [updateDraft]);
 
   const resume = useCallback(async () => {
-    updateDraft((current) => ({ ...current, status: "running", resumedAt: Date.now() }));
-    await beginPedometer();
-  }, [beginPedometer, updateDraft]);
+    updateDraft((current) => ({ ...current, status: "running", resumedAt: Date.now(), steps: 0, stepSource: "indisponivel" }));
+  }, [updateDraft]);
 
   const finish = useCallback((): CardioSession | null => {
     const live = liveRef.current;

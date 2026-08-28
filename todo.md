@@ -76,3 +76,11 @@
 - [x] Corrigir a chamada de conversa e mensagens de erro da API.
 - [x] Corrigir contraste e visibilidade do texto digitado no campo do IA Coach.
 - [x] Validar e publicar a nova versão Android 2.4.0.
+
+## Correção de localização, passos e teclado
+
+- [x] Remover completamente a dependência do pedômetro para o contador exibido durante o cardio.
+- [x] Usar localização atual para posicionar e centralizar o mapa antes de iniciar.
+- [x] Melhorar o carregamento inicial e o foco automático da rota no mapa.
+- [x] Manter o composer do IA Coach acima do teclado Android.
+- [ ] Validar e publicar nova versão Android com essas correções.
