@@ -93,3 +93,8 @@
 - [x] Atualizar a interface para informar quando os passos são reais ou indisponíveis.
 - [x] Adicionar testes do fluxo do pedômetro e validar TypeScript, lint e export Android.
 - [x] Sincronizar e publicar o APK atualizado no GitHub.
+
+## Correção do link público do APK
+
+- [x] Tornar o link da release mais recente explícito no README público.
+- [x] Confirmar o link remoto e o asset APK no GitHub após o push.
