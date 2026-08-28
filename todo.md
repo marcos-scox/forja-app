@@ -84,3 +84,12 @@
 - [x] Melhorar o carregamento inicial e o foco automático da rota no mapa.
 - [x] Manter o composer do IA Coach acima do teclado Android.
 - [x] Validar e publicar nova versão Android com essas correções.
+
+## Reativação segura do pedômetro
+
+- [x] Reativar o pedômetro nativo somente durante uma sessão ativa.
+- [x] Validar a disponibilidade e a permissão do sensor sem usar ruído do GPS como fallback.
+- [x] Somar apenas deltas válidos do pedômetro e impedir regressões ou leituras inválidas.
+- [x] Atualizar a interface para informar quando os passos são reais ou indisponíveis.
+- [x] Adicionar testes do fluxo do pedômetro e validar TypeScript, lint e export Android.
+- [ ] Sincronizar e publicar o APK atualizado no GitHub.

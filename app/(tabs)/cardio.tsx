@@ -173,7 +173,7 @@ export default function CardioScreen() {
           </View>
           <View style={styles.infoRow}>
             <MaterialIcons color={forjaColors.lime} name="directions-walk" size={21} />
-            <Text style={styles.infoText}>Passos vêm do pedômetro quando ele estiver disponível; caso contrário, são estimados pela distância registrada.</Text>
+            <Text style={styles.infoText}>Passos vêm do pedômetro nativo durante a sessão. Se o sensor não estiver disponível ou autorizado, o app informa isso e não inventa passos.</Text>
           </View>
         </Card>
       </ScrollView>
