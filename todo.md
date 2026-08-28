@@ -83,4 +83,4 @@
 - [x] Usar localização atual para posicionar e centralizar o mapa antes de iniciar.
 - [x] Melhorar o carregamento inicial e o foco automático da rota no mapa.
 - [x] Manter o composer do IA Coach acima do teclado Android.
-- [ ] Validar e publicar nova versão Android com essas correções.
+- [x] Validar e publicar nova versão Android com essas correções.

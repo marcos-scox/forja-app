@@ -10,7 +10,7 @@ O **Forja** é a versão mobile nativa do projeto de treinos. A aplicação foi 
 | Cardio | Localização em tempo real, mapa Leaflet com OpenStreetMap, rota, distância, cronômetro, ritmo e passos. |
 | Sessões | Controles para iniciar, pausar, retomar e finalizar/salvar. |
 | Histórico | Sessões armazenadas localmente com métricas e trajeto consultável. |
-| Movimento | Pedômetro nativo quando disponível; estimativa por distância como alternativa. |
+| Movimento | Rastreamento baseado somente em GPS; o pedômetro não é usado para evitar passos falsos quando o usuário está parado. |
 | Privacidade | As sessões e preferências da versão atual ficam no dispositivo do usuário. |
 
 ## Desenvolvimento
@@ -31,11 +31,11 @@ O rastreamento de localização e o pedômetro requerem um dispositivo físico c
 
 O APK da versão **Expo/React Native** é gerado e hospedado pelo próprio GitHub. A versão nativa atual está disponível aqui:
 
-[**Baixar FORJA v2.4.0 para Android**](https://github.com/marcos-scox/forja-app/releases/download/v2.4.0/FORJA-v2.4.0.apk)
+[**Baixar FORJA v2.5.0 para Android**](https://github.com/marcos-scox/forja-app/releases/download/v2.5.0/FORJA-v2.5.0.apk)
 
 No repositório, abra a aba **Actions**, selecione **Gerar APK Android nativo** e use **Run workflow** para gerar versões futuras. Ao finalizar, o GitHub cria a release escolhida e anexa o arquivo `FORJA-vX.Y.Z.apk` para download.
 
-> **Não use o APK da release `v1.0.0`**, pois ele pertence à antiga versão web/PWA. Use a release `v2.4.0` ou superior para instalar o aplicativo mobile nativo.
+> **Não use o APK da release `v1.0.0`**, pois ele pertence à antiga versão web/PWA. Use a release `v2.5.0` ou superior para instalar o aplicativo mobile nativo.
 
 O primeiro APK é assinado para distribuição de teste e pode ser instalado diretamente em aparelhos Android. Para publicar em lojas, configure uma chave de assinatura de produção nas credenciais do repositório antes de gerar uma release de distribuição final.
 
