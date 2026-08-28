@@ -92,4 +92,4 @@
 - [x] Somar apenas deltas válidos do pedômetro e impedir regressões ou leituras inválidas.
 - [x] Atualizar a interface para informar quando os passos são reais ou indisponíveis.
 - [x] Adicionar testes do fluxo do pedômetro e validar TypeScript, lint e export Android.
-- [ ] Sincronizar e publicar o APK atualizado no GitHub.
+- [x] Sincronizar e publicar o APK atualizado no GitHub.
